@@ -35,7 +35,7 @@ public Plugin myinfo =
 	author = "Tak (Chaosxk)",
 	description = "Allows players to sprint by double tapping forward button.",
 	version = PLUGIN_VERSION,
-	url = ""
+	url = "https://github.com/xcalvinsz/stamina"
 }
 
 public void OnPluginStart()
