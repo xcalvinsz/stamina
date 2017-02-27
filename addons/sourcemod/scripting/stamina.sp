@@ -160,7 +160,7 @@ public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3
 			RemoveAttribute(client, 107);
 			g_iButtonCount[client] = 0;
 			g_hStaminaTimer[client] = CreateTimer(g_cRegen.FloatValue, Timer_Regenerate, GetClientUserId(client), TIMER_REPEAT);
-	}
+		}
 	}
 	
 	//Cache old buttons so that we can use it to execute our code 1 at a time instead of 66 FPS
