@@ -6,10 +6,11 @@
 
 #define PLUGIN_VERSION "1.0"
 
-ConVar g_cEnabled, g_cSpeed, g_cClass, g_cDrain, g_cRegen, g_cHudX, g_cHudY;
+ConVar g_cEnabled, g_cSpeed, g_cClass, g_cDrain, g_cRegen, g_cHudX, g_cHudY, g_cTeam;
 int g_iLastButton[MAXPLAYERS + 1];
 int g_iButtonCount[MAXPLAYERS + 1];
-int g_iClientBit[MAXPLAYERS + 1];
+int g_iClientClass[MAXPLAYERS + 1];
+int g_iClientTeam[MAXPLAYERS + 1];
 bool g_bAccess[MAXPLAYERS + 1];
 float g_fStamina[MAXPLAYERS + 1];
 Handle g_hResetTimer[MAXPLAYERS + 1];
@@ -48,27 +49,38 @@ public void OnPluginStart()
 	g_cRegen = CreateConVar("sm_stamina_regen", "0.5", "How fast to regenerate stamina, 0.1 is fastest.");
 	g_cHudX = CreateConVar("sm_stamina_hudx", "0.0", "X coordinate of HUD display.");
 	g_cHudY = CreateConVar("sm_stamina_hudy", "1.0", "Y coordinate of HUD display.");
+	g_cTeam = CreateConVar("sm_stamina_team", "1", "0 - None, 1 - Both, 2 - Red, 3 - Blue");
 	
-	HookEvent("player_changeclass", Hook_ClassChange, EventHookMode_Post);
+	HookEvent("player_changeclass", Hook_ClassChange);
+	HookEvent("player_team", Hook_TeamChange);
 	
 	for (int i = 1; i <= MaxClients; i++)
 	{
 		if (!IsClientInGame(i))
 			continue;
 		OnClientPostAdminCheck(i);
-		g_iClientBit[i] = view_as<int>(TF2_GetPlayerClass(i)) - 1;
+		g_iClientClass[i] = view_as<int>(TF2_GetPlayerClass(i)) - 1;
+		g_iClientTeam[i] = GetClientTeam(i);
 	}
+	
 	CreateTimer(0.1, Timer_Hud, _, TIMER_REPEAT);
 	g_hHudSync = CreateHudSynchronizer();
 	
 	AutoExecConfig(false, "stamina");  
 }
 
-//Cache client class because we need to retrieve player class in a 0.1 sec timer
+//Cache client class because i don't want to call this constantly under a timer/onplayerruncmd
 public Action Hook_ClassChange(Event event, const char[] name, bool dontBroadcast)
 {
 	int client = GetClientOfUserId(event.GetInt("userid"));
-	g_iClientBit[client] = event.GetInt("class") - 1;
+	g_iClientClass[client] = event.GetInt("class") - 1;
+}
+
+//Cache client team because i don't want to call this constantly under a timer/onplayerruncmd
+public Action Hook_TeamChange(Event event, const char[] name, bool dontBroadcast)
+{
+	int client = GetClientOfUserId(event.GetInt("userid"));
+	g_iClientTeam[client] = event.GetInt("team");
 }
 
 //Make sure when map changes that we reset everything and close the timers properly to prevent any memory leaks
@@ -113,13 +125,7 @@ public Action Timer_Hud(Handle hTimer)
 //This whole logic was annoying to figure out (^);;)>
 public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3], float angles[3], int &weapon)
 {
-	if (!g_cEnabled.BoolValue)
-		return Plugin_Continue;
-		
-	if (!g_bAccess[client])
-		return Plugin_Continue;
-	
-	if (!CanClientSprint(client))
+	if (!g_cEnabled.BoolValue || !g_bAccess[client] || !IsPlayerAlive(client) || !CanClientSprint(client))
 		return Plugin_Continue;
 		
 	if ((buttons & IN_FORWARD))
@@ -214,8 +220,8 @@ void RemoveAttribute(int client, int index)
 //Bit-Wise operation to determine if player class can sprint
 bool CanClientSprint(int client)
 {
-	int bit = 1 << g_iClientBit[client];
-	return (g_cClass.IntValue & bit) ? true : false;
+	int bit = 1 << g_iClientClass[client];
+	return (g_cClass.IntValue & bit) && (g_cTeam.IntValue == 1 || g_cTeam.IntValue == g_iClientTeam[client]) ? true : false;
 }
 
 //Gets the offset speed that TFCond_SpeedBuffAlly adds so we can offset it
