@@ -4,7 +4,7 @@
 #include <tf2>
 #include <tf2_stocks>
 
-#define PLUGIN_VERSION "1.0"
+#define PLUGIN_VERSION "1.1"
 
 ConVar g_cEnabled, g_cSpeed, g_cClass, g_cDrain, g_cRegen, g_cHudX, g_cHudY, g_cTeam;
 int g_iLastButton[MAXPLAYERS + 1];
