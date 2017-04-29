@@ -46,3 +46,11 @@ For example if i wanted only pyro and medic to have stamina sprinting, i would a
 I would then set sm_stamina_class 80 
 511 will enable all class to use stamina sprinting
 ```
+
+## Overrides
+```
+This plugin is enabled for all clients who joins the server, if you want to limit this to an admin flag then set your admin overrides to 
+sm_stamina_override
+
+Plugin must be reloaded if you change the override.
+```
