@@ -49,7 +49,8 @@ I would then set sm_stamina_class 80
 
 ## Overrides
 ```
-This plugin is enabled for all clients who joins the server, if you want to limit this to an admin flag then set your admin overrides to 
+This plugin is enabled for all clients who joins the server
+If you want to limit this to an admin flag then set your admin overrides to 
 sm_stamina_override
 
 Plugin must be reloaded if you change the override.
