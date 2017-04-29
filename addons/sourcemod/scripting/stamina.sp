@@ -1,10 +1,31 @@
+/*  TF2 Stamina Sprinting
+ *
+ *  Copyright (C) 2017 Calvin Lee (Chaosxk)
+ * 
+ * This program is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) 
+ * any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT 
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with 
+ * this program. If not, see http://www.gnu.org/licenses/.
+ */
+ 
+#pragma semicolon 1
+
 #include <sourcemod>
 #include <sdktools>
 #include <tf2attributes>
 #include <tf2>
 #include <tf2_stocks>
 
-#define PLUGIN_VERSION "1.1"
+#pragma newdecls required
+
+#define PLUGIN_VERSION "1.2"
 
 ConVar g_cEnabled, g_cSpeed, g_cClass, g_cDrain, g_cRegen, g_cHudX, g_cHudY, g_cTeam;
 int g_iLastButton[MAXPLAYERS + 1];
@@ -16,19 +37,6 @@ float g_fStamina[MAXPLAYERS + 1];
 Handle g_hResetTimer[MAXPLAYERS + 1];
 Handle g_hStaminaTimer[MAXPLAYERS + 1];
 Handle g_hHudSync;
-/*
-enum (<<= 1)
-{
-	SCOUT = 1,
-	SOLDIER,
-	PYRO,
-	DEMOMAN,
-	HEAVY,
-	ENGINEER,
-	MEDIC,
-	SNIPER,
-	SPY
-}*/
 
 public Plugin myinfo = 
 {
@@ -41,7 +49,7 @@ public Plugin myinfo =
 
 public void OnPluginStart()
 {
-	CreateConVar("sm_stamina_version", "1.0", PLUGIN_VERSION, FCVAR_SPONLY|FCVAR_REPLICATED|FCVAR_NOTIFY);
+	CreateConVar("sm_stamina_version", "1.0", PLUGIN_VERSION, FCVAR_SPONLY|FCVAR_REPLICATED|FCVAR_NOTIFY|FCVAR_DONTRECORD);
 	g_cEnabled = CreateConVar("sm_stamina_enabled", "1", "Enables/Disables stamina sprinting.");
 	g_cSpeed = CreateConVar("sm_stamina_speed", "1.75", "Speed increase value when sprinting.");
 	g_cClass = CreateConVar("sm_stamina_class", "511", "Bit-Wise operation to determine which class can sprint.");
@@ -49,7 +57,7 @@ public void OnPluginStart()
 	g_cRegen = CreateConVar("sm_stamina_regen", "0.5", "How fast to regenerate stamina, 0.1 is fastest.");
 	g_cHudX = CreateConVar("sm_stamina_hudx", "0.0", "X coordinate of HUD display.");
 	g_cHudY = CreateConVar("sm_stamina_hudy", "1.0", "Y coordinate of HUD display.");
-	g_cTeam = CreateConVar("sm_stamina_team", "1", "0 - None, 1 - Both, 2 - Red, 3 - Blue");
+	g_cTeam = CreateConVar("sm_stamina_team", "1", "0 - None, 1 - Both, 2 - Red, 3 - Blue.");
 	
 	HookEvent("player_changeclass", Hook_ClassChange);
 	HookEvent("player_team", Hook_TeamChange);
@@ -66,7 +74,7 @@ public void OnPluginStart()
 	CreateTimer(0.1, Timer_Hud, _, TIMER_REPEAT);
 	g_hHudSync = CreateHudSynchronizer();
 	
-	AutoExecConfig(false, "stamina");  
+	AutoExecConfig(true, "stamina");  
 }
 
 //Cache client class because i don't want to call this constantly under a timer/onplayerruncmd
