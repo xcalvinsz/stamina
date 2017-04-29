@@ -28,3 +28,21 @@ sm_stamina_team - 0 - None, 1 - Both, 2 - Red, 3 - Blue.
 1. Place stamina.smx to addons/sourcemod/plugins/
 2. Place stamina.cfg to cfg/sourcemod/ and edit your convars to fit your needs
 ```
+
+## Class Type Bit-Wise
+```
+Scout =		1
+Sniper =	2
+Soldier =	4
+Demoman =	8
+Medic =		16
+Heavy =		32
+Pyro =		64
+Spy =		128
+Engineer =	256
+
+To use sm_stamina_class, add the values of whatever class you want stamina sprinting to work for 
+For example if i wanted only pyro and medic to have stamina sprinting, i would add 64 + 16 = 80
+I would then set sm_stamina_class 80 
+511 will enable all class to use stamina sprinting
+```
